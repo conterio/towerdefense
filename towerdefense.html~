@@ -1,0 +1,336 @@
+<!doctype html>
+<html>
+<head>
+
+  <style>
+  body {
+    margin:0 0 0 0;
+  }
+  #target {
+    overflow:hidden; 
+    background-color:green;
+  }
+  </style>
+  <meta name="viewport"
+	content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+  <script src="simply.js"></script>
+    <script>
+    /*
+      enemys
+    ---------
+    *health
+    *speed
+    *size
+
+    towers
+    -------
+    *range
+    *speed
+    *damage
+
+    map
+    -----
+    *path
+    *timer
+
+    level
+   -------
+    *timer (60 seconds a level) (30 seconds to place)
+    *monsters
+    *boss
+
+
+
+
+
+    */
+    </script>
+  <script>
+ var level1 = 5;
+ var level2 = 10;
+ var level3 = 15;
+ var health = 3;
+ var currentLevel = 1;
+ var gameTimer = 0;
+ var roundTimer = 0;
+var levelTimer;
+
+ var inPlay = false;
+
+  function start(){
+	
+
+	//code goes below here
+	sjs.open("target",800,800);
+	var speed = 12;
+	var path = [{dx:sjs.getWidth(),dy:0,duration:speed},{dx:0,dy:200,duration:speed},{dx:-sjs.getWidth(),dy:0,duration:speed},{dx:0,dy:200,duration:speed},{dx:sjs.getWidth(),dy:0,duration:speed},{dx:0,dy:200,duration:speed},{dx:-sjs.getWidth(),dy:0,duration:speed},{dx:0,dy:200,duration:speed},{dx:sjs.getWidth()+999,dy:0,duration:speed}];
+
+    
+    
+    levelTimer = new sjs.Text("time: "+ roundTimer).bottom().right();
+    
+    setInterval(function(levelTimer){
+
+	levelTimer.setText("Time: "+roundTimer);
+        roundTimer=roundTimer+1;
+        //roundTimer=roundTimer%roundTimer;
+        
+    },1000);
+
+   var levelTimer = setInterval(function(){
+       
+
+        if(inPlay==true){
+            inPlay=false;
+
+        if(currentLevel==1){
+            
+    
+        }
+        if(currentLevel==2){
+    
+        }
+        if(currentLevel==3){
+    
+        }else{
+            //winstage
+        }
+            
+
+
+
+
+
+        }else if(inPlay==false){
+            inPlay=true;
+            currentLevel++;
+            
+            //canmove towers around
+
+
+
+
+        }
+    
+
+
+    },roundTimer);
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	var level1Monster = setInterval(function(){
+		var e = new sjs.Image("homerboss.gif",60,80).top().left();
+		e.moveTo(0,0);
+		e.lives=50;
+		e.type="enemy";		
+		e.setCourse(path);
+		level1--;
+		
+		
+	},6000);
+
+	var level1Monster2 = setInterval(function(){
+		var e = new sjs.Image("Block1.png").top().left();
+		e.moveTo(0,0);
+		e.lives=10;
+		e.type="enemy";		
+		e.setCourse(path);
+		level1--;
+		
+	},10000);
+
+	setInterval(function(){
+	    if(level1<=0){
+            clearInterval(level1Monster);
+            clearInterval(level1Monster2);
+        }
+	},5000);
+
+
+
+	var tower = new sjs.Image("tower2.png").offset(200,70);
+	tower.type="tower";
+	tower.draggable();
+	tower.friction = 0;
+	tower.noBounds=true;
+	
+	tower.node.style.padding="150px";
+	tower.node.style.border="4px solid red";
+	tower.node.style.borderRadius="50%";
+
+	var kills = 0;
+	var kills_text = new sjs.Text("kills: "+ kills).bottom().center();
+	var amount = 18;
+//	alert(amount);
+
+
+	
+	var wall = new sjs.Image("invis.png",sjs.getWidth(),1).top();
+	wall.type="wall";
+	var wall1 = new sjs.Image("invis.png",sjs.getWidth(),1).bottom();
+	wall1.type="wall";
+	var wall2 = new sjs.Image("invis.png",1,sjs.getHeight()).left();
+	wall2.type="wall";
+	var wall3 = new sjs.Image("invis.png",1,sjs.getHeight()).right();
+	wall3.type="wall";
+	var end = new sjs.Image("invis.png",20,20).bottom().right();
+	end.type="end";
+	
+	sjs.onHit("enemy","tower",function(e,t){
+			var x = e.x+(e.getWidth()/2);
+			var y = e.y+(e.getHeight()/2)
+			var centerx = t.x+(t.getWidth()/2);
+			var centery = t.y+(t.getHeight()/2);
+
+
+		
+		if(allowShoot == true){
+			var bullet = new sjs.Image("bullet.png");
+			bullet.type="bullet";
+			bullet.moveTo(t.x+(t.getWidth()/2),t.y+(t.getHeight()/2));
+			bullet.friction=0;
+			allowShoot=false;
+		
+	 	    //top right
+	 	    if(x > centerx && y < centery){
+	 	    	xDif = Math.abs(centerx - x);
+	 	    	yDif = Math.abs(centery - y);
+	 	    	hypot = Math.sqrt( (Math.pow(yDif,2)) + (Math.pow(xDif,2))  );
+	 	    	hypot = amount/hypot;
+	 	    	bullet.pushRight(hypot*xDif);
+	 	    	bullet.pushUp(hypot*yDif);    	
+	 	    }//bottom right
+	 	    else if(x > centerx && y > centery){
+	 	    	xDif = Math.abs(centerx - x);
+	 	    	yDif = Math.abs(centery - y);
+	 	    	hypot = Math.sqrt(  (Math.pow(yDif,2)) + (Math.pow(xDif,2))  );
+	 	    	hypot = amount/hypot;
+	 	    	bullet.pushRight(hypot*xDif);
+	 	    	bullet.pushDown(hypot*yDif);
+	 	    }
+	 	    //bottom left
+	 	    else if(x < centerx && y > centery){
+	 	    	xDif = Math.abs(centerx - x);
+	 	    	yDif = Math.abs(centery - y);
+	 	    	hypot = Math.sqrt(  (Math.pow(yDif,2)) + (Math.pow(xDif,2))  );
+	 	    	hypot = amount/hypot;
+	 	    	bullet.pushLeft(hypot*xDif);
+	 	    	bullet.pushDown(hypot*yDif);
+	 	    }
+	 	    //top left
+	 	    else{
+	 	    	xDif = Math.abs(centerx - x);
+	 	    	yDif = Math.abs(centery - y);
+	 	    	hypot = Math.sqrt(  (Math.pow(yDif,2)) + (Math.pow(xDif,2))  );
+	 	    	hypot = amount/hypot;
+	 	    	bullet.pushLeft(hypot*xDif);
+	 	    	bullet.pushUp(hypot*yDif);
+	 	    }//end if where to move player
+		}
+	});
+
+
+
+	var pace = 1000;
+	var i = 0;
+	var interval = setInterval(function(){
+		if(i==0){
+		allowShoot=true;
+		i=1;
+		}else{
+		allowShoot=true;
+		i=0;
+		}
+	},pace);
+
+	sjs.onHit("enemy","bullet",function(e,b){
+		if(e.lives==undefined||e.lives==0)
+			e.destroy();
+		else
+			e.lives=e.lives-1;
+		
+		b.destroy();
+		kills++;
+		kills_text.setText("kills: "+kills);
+		if(kills%10==0){
+		pace = pace -100;
+
+			clearInterval(interval);
+			interval = setInterval(function(){
+					if(i==0){
+					allowShoot=true;
+					i=1;
+					}else{
+					allowShoot=true;
+					i=0;
+					}
+				},pace);
+
+
+
+
+
+		}
+
+	});
+
+	sjs.onHit("bullet","wall",function(b,t){
+		b.destroy();
+
+	});
+
+
+
+
+	sjs.onHit("enemy","end",function(){
+		location.reload();
+	});
+
+
+
+
+
+
+
+
+
+
+	  
+	  
+	  
+	//no code past this 
+}
+  </script>
+
+</head>
+<body onload="start();">
+<center>
+<div id="target"></div>
+</center>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!doctype html>
+<html>
+<head>
+
+  <style>
+  body {
+    margin:0 0 0 0;
+  }
+  #target {
+    overflow:hidden; 
+
+  }
+  </style>
+  <meta name="viewport"
+	content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+  <script src="simply.js"></script>
+
+  
+  
+  <script>
+	
+	
+	//create path
+	//create enemies
+	//create towers
+	//
+
+  function start(){
+	//code goes below here
+	sjs.open("target",800,800);
+	var speed = 5;
+	var path = [{dx:sjs.getWidth(),dy:0,duration:speed},{dx:0,dy:200,duration:1},{dx:-sjs.getWidth(),dy:0,duration:speed},{dx:0,dy:200,duration:speed},{dx:sjs.getWidth(),dy:0,duration:speed},{dx:0,dy:200,duration:speed},{dx:-sjs.getWidth(),dy:0,duration:speed},{dx:0,dy:200,duration:speed},{dx:sjs.getWidth()+999,dy:0,duration:speed}];
+	var bg = new sjs.Image("bg.png",800,800);
+	
+	setInterval(function(){
+		var e = new sjs.Image("Block.png");
+		e.type="enemy";		
+		e.setCourse(path);
+	},400);
+
+	var tower = new sjs.Image("tower2.png",0,0,50,true).offset(200,70);
+	tower.type="tower";
+	tower.draggable();
+	tower.friction = 0;
+		  tower.node.onmouseover=function(){tower.onmouseover();};
+	  tower.node.onmouseout=function(){tower.onmouseout();};
+
+
+	var kills = 0;
+	var kills_text = new sjs.Text("kills: "+ kills).bottom().center();
+
+	
+	var wall = new sjs.Image("invis.png",sjs.getWidth(),1).top();
+	wall.type="wall";
+	var wall1 = new sjs.Image("invis.png",sjs.getWidth(),1).bottom();
+	wall1.type="wall";
+	var wall2 = new sjs.Image("invis.png",1,sjs.getHeight()).left();
+	wall2.type="wall";
+	var wall3 = new sjs.Image("invis.png",1,sjs.getHeight()).right();
+	wall3.type="wall";
+	var end = new sjs.Image("invis.png",20,20).bottom().right();
+	end.type="end";
+	
+	sjs.onHit("enemy","tower",function(e,t){
+			var x = e.x;
+			var y = e.y;
+
+		if(allowShoot == true){
+			var bullet = new sjs.Image("bullet.png");
+			bullet.type="bullet";
+			bullet.moveTo(tower.x+(tower.getWidth()/2),tower.y+(tower.getHeight()/2));
+			bullet.friction=0;
+			
+			if(x>tower.x+(tower.getWidth()/2))
+				bullet.pushRight(3);
+			else
+				bullet.pushLeft(3);
+			if(y>tower.y+(tower.getHeight()/2))
+				bullet.pushDown(3);
+			else
+				bullet.pushUp(3);
+			allowShoot=false;
+		}
+
+			
+			
+
+	});
+	var pace = 1000;
+	var i = 0;
+	var interval = setInterval(function(){
+		if(i==0){
+		allowShoot=true;
+		i=1;
+		}else{
+		allowShoot=true;
+		i=0;
+		}
+	},pace);
+
+	sjs.onHit("enemy","bullet",function(e,b){
+		e.destroy();
+		b.destroy();
+		kills++;
+		kills_text.setText("kills: "+kills);
+		if(kills%10==0){
+		pace = pace -100;
+
+			clearInterval(interval);
+			interval = setInterval(function(){
+					if(i==0){
+					allowShoot=true;
+					i=1;
+					}else{
+					allowShoot=true;
+					i=0;
+					}
+				},pace);
+
+
+
+
+
+		}
+
+	});
+
+	sjs.onHit("bullet","wall",function(b,t){
+		b.destroy();
+
+	});
+
+
+
+
+	sjs.onHit("enemy","end",function(){
+		location.reload();
+	});
+
+
+
+
+
+
+
+
+
+
+	  
+	  
+	  
+	//no code past this 
+}
+  </script>
+
+</head>
+<body onload="start();">
+<center>
+<div id="target"></div>
+</center>
+</body>
+</html>
