@@ -1,0 +1,329 @@
+<!doctype html>
+<html>
+<head>
+
+  <style>
+  body {
+    margin:0 0 0 0;
+  }
+  #target {
+    overflow:hidden; 
+    background-color:green;
+  }
+  </style>
+  <meta name="viewport"
+	content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+  <script src="simply.js"></script>
+    <script>
+    /*
+      enemys
+    ---------
+    *health
+    *speed
+    *size
+
+    towers
+    -------
+    *range
+    *speed
+    *damage
+
+    map
+    -----
+    *path
+    *timer
+
+    level
+   -------
+    *timer (60 seconds a level) (30 seconds to place)
+    *monsters
+    *boss
+
+	
+	//set up timer and variables.
+
+
+
+
+    */
+    </script>
+  <script>
+  
+ //global static variables exsist in entire program and can be changed in any scope
+ var level1 = 511;		//how many enemys will spawn in this level
+ var level2 = 10;		//how many enemys will spawn in this level
+ var level3 = 15;       //how many enemys will spawn in this level
+ var health = 3;		//how much lives you get before you lose
+ var currentLevel = 0;  //initial level to start at
+ var roundTimer = 5;  //set this to initial prepare time in seconds
+ var inPlay = false;    //this is true if level is currently going
+ 
+ 
+ var gold = 500;    //how much gold you start with.
+
+  function start(){
+	//code goes below here
+	sjs.open("target",800,800);  //setup viewport size
+    
+	
+	//timer and level setter ---------------------------------------------------------------------------------------------------------
+	
+    var timerMsg = "Prepare for battle in: ";
+    var levelTimer = new sjs.Text(timerMsg+ roundTimer + " seconds").bottom().left();
+	var goldText = new sjs.Text("Gold: "+ gold).bottom().right().offset(-10,0);
+	
+	
+	setInterval(function(){
+		
+        roundTimer=roundTimer-1;
+		levelTimer.setText(timerMsg + " "+ roundTimer + " seconds");
+		
+		//switch from prepare to playing
+		
+		//when the timer switches to zero start the next wave
+		if(roundTimer<=0 && inPlay==false){
+
+			timerMsg="Survive for";
+			inPlay=true;
+			roundTimer=10;
+			currentLevel++;
+			playLevel(currentLevel);  	//start next level by calling the playLevel function passing in the level they are at
+			
+		}
+		
+		//when timer switches to 0 clear wave and start timer for in between round and add 1 to current level
+		if(roundTimer<=0 && inPlay==true){
+			roundTimer=10;
+			inPlay=false;
+			timerMsg="Prepare for battle in: ";
+
+		}
+    },1000);//timer countdown every 1 second
+    
+	//------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+	//play level function------------------------------------------------------------------------------------------------------------------------
+	//in each level they can make enemies, bosses, custom paths, etc.
+	
+	function playLevel(currentLevel){
+			
+		//check to see what level they are on
+		if(currentLevel == 1){
+			var speed = 12;
+			var path = [{dx:sjs.getWidth(),dy:0,duration:speed},{dx:0,dy:200,duration:speed},{dx:-sjs.getWidth(),dy:0,duration:speed},{dx:0,dy:200,duration:speed},{dx:sjs.getWidth(),dy:0,duration:speed},{dx:0,dy:200,duration:speed},{dx:-sjs.getWidth(),dy:0,duration:speed},{dx:0,dy:200,duration:speed},{dx:sjs.getWidth()+999,dy:0,duration:speed}];
+					
+			//each monster is created on an interval that should clear when the level is over.
+			var level1Monster = setInterval(function(){
+				if(inPlay==false){
+					clearInterval(level1Monster);
+				}
+				var e = new sjs.Image("homerboss.gif",60,80).top().left();
+				e.moveTo(0,0);
+				e.lives=50;
+				e.type="enemy";		
+				e.setCourse(path);
+				level1--;
+				
+			},6000);
+
+			var level1Monster2 = setInterval(function(){
+				if(inPlay==false){
+					clearInterval(level1Monster2);
+				}
+				var e = new sjs.Image("Block1.png").top().left();
+				e.moveTo(0,0);
+				e.lives=10;
+				e.type="enemy";		
+				e.setCourse(path);
+				level1--;
+			},10000);
+		
+		
+		}
+		else if(currentLevel == 2){
+		
+		
+		
+		}
+		else if(currentLevel == 3){
+		
+		
+		
+		}else{
+			//win stage
+		
+		}
+	
+	}
+	
+	
+	
+	
+	
+	
+	//
+
+
+
+	//tower
+	//each tower can have range, attack power, speed
+	//can only move during in between rounds
+	var tower = new sjs.Image("tower2.png").offset(200,70);
+	tower.type="tower";	
+	tower.friction = 0;
+	tower.fireRate=1000;
+	tower.noBounds=true;
+	tower.node.style.padding="150px";    //how wide the range is
+	tower.node.style.border="4px solid transparent";
+	tower.node.style.borderRadius="50%";
+	
+	tower.node.onmouseover=function(){
+		if(inPlay==false){
+			tower.draggable();
+		}else{
+			tower.undraggable();
+		}
+		tower.node.style.borderColor="red";
+
+	};
+	tower.node.onmouseout=function(){
+		tower.node.style.borderColor="transparent";	
+	}
+	
+
+
+	var kills = 0;
+	var kills_text = new sjs.Text("kills: "+ kills).bottom().center();
+	var amount = 18;
+//	alert(amount);
+
+
+	
+	var wall = new sjs.Image("invis.png",sjs.getWidth(),1).top();
+	wall.type="wall";
+	var wall1 = new sjs.Image("invis.png",sjs.getWidth(),1).bottom();
+	wall1.type="wall";
+	var wall2 = new sjs.Image("invis.png",1,sjs.getHeight()).left();
+	wall2.type="wall";
+	var wall3 = new sjs.Image("invis.png",1,sjs.getHeight()).right();
+	wall3.type="wall";
+	var end = new sjs.Image("invis.png",20,20).bottom().right();
+	end.type="end";
+	
+	
+	
+	
+	sjs.onHit("enemy","tower",function(e,t){
+			var x = e.x+(e.getWidth()/2);
+			var y = e.y+(e.getHeight()/2)
+			var centerx = t.x+(t.getWidth()/2);
+			var centery = t.y+(t.getHeight()/2);
+			
+			
+
+		
+		if(allowShoot == true){
+			var bullet = new sjs.Image("bullet.png");
+			bullet.type="bullet";
+			bullet.moveTo(t.x+(t.getWidth()/2),t.y+(t.getHeight()/2));
+			bullet.friction=0;
+
+		
+	 	    //top right
+	 	    if(x > centerx && y < centery){
+	 	    	xDif = Math.abs(centerx - x);
+	 	    	yDif = Math.abs(centery - y);
+	 	    	hypot = Math.sqrt( (Math.pow(yDif,2)) + (Math.pow(xDif,2))  );
+	 	    	hypot = amount/hypot;
+	 	    	bullet.pushRight(hypot*xDif);
+	 	    	bullet.pushUp(hypot*yDif);    	
+	 	    }//bottom right
+	 	    else if(x > centerx && y > centery){
+	 	    	xDif = Math.abs(centerx - x);
+	 	    	yDif = Math.abs(centery - y);
+	 	    	hypot = Math.sqrt(  (Math.pow(yDif,2)) + (Math.pow(xDif,2))  );
+	 	    	hypot = amount/hypot;
+	 	    	bullet.pushRight(hypot*xDif);
+	 	    	bullet.pushDown(hypot*yDif);
+	 	    }
+	 	    //bottom left
+	 	    else if(x < centerx && y > centery){
+	 	    	xDif = Math.abs(centerx - x);
+	 	    	yDif = Math.abs(centery - y);
+	 	    	hypot = Math.sqrt(  (Math.pow(yDif,2)) + (Math.pow(xDif,2))  );
+	 	    	hypot = amount/hypot;
+	 	    	bullet.pushLeft(hypot*xDif);
+	 	    	bullet.pushDown(hypot*yDif);
+	 	    }
+	 	    //top left
+	 	    else{
+	 	    	xDif = Math.abs(centerx - x);
+	 	    	yDif = Math.abs(centery - y);
+	 	    	hypot = Math.sqrt(  (Math.pow(yDif,2)) + (Math.pow(xDif,2))  );
+	 	    	hypot = amount/hypot;
+	 	    	bullet.pushLeft(hypot*xDif);
+	 	    	bullet.pushUp(hypot*yDif);
+	 	    }//end if where to move player
+			allowShoot=0;
+		}
+		
+	});
+
+
+
+	
+
+	sjs.onHit("enemy","bullet",function(e,b){
+		if(e.lives==undefined||e.lives==0){
+			e.destroy();
+			kills++;
+			kills_text.setText("kills: "+kills);
+		
+		}
+		else{
+			e.lives=e.lives-1;
+		}
+		
+		b.destroy();
+		
+
+	});
+
+	sjs.onHit("bullet","wall",function(b,t){
+		b.destroy();
+
+	});
+
+
+
+
+	sjs.onHit("enemy","end",function(){
+		location.reload();
+	});
+
+
+
+
+
+
+
+
+
+
+	  
+	  
+	  
+	//no code past this 
+}
+  </script>
+
+</head>
+<body onload="start();">
+<center>
+<div id="target"></div>
+</center>
+</body>
+</html>
